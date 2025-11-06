@@ -10,12 +10,10 @@ import CommandManager from "./tools/commandFunction/CommandManager";
 import AllProviders from "./AllProviders";
 import PreventProvider from "./tools/preventFunction/PreventProvider";
 import Hack from "./components/Hack";
-import CheckMission from "./components/CheckMission";
 import AttackPattern from "./components/AttackPattern";
 import Waiting from "./tools/waitFunction/Waiting";
 import { RecoilRoot } from "recoil";
 import Test from "./components/Test";
-import WordPiece from "./components/WordPiece";
 
 const App = () => {
   return (
@@ -33,10 +31,8 @@ const App = () => {
             <Route path="/memo" element={<Memo />} />
             <Route path="/practice" element={<Practice />} />
             <Route path="/hack" element={<Hack />} />
-            <Route path="/check_mission" element={<CheckMission />} />
             <Route path="/pattern" element={<AttackPattern />} />
             <Route path="/test" element={<Test />} />
-            <Route path="/word_piece" element={<WordPiece />} />
           </Routes>
         </AllProviders>
       </BrowserRouter>
