@@ -124,7 +124,7 @@ class WordDB:
 
             if dto.shMisType == 'value':
                 return self.valueMission(count, first_letter, item_letter, dto.mission, rangeSet, options, subjectSet)
-            sql = self.mission(count, first_letter, item_letter, dto.mission, rangeSet, dto.shMisType, options, subjectSet)
+            sql = self.mission(first_letter, item_letter, dto.mission, rangeSet, dto.shMisType, options, subjectSet)
         elif dto.type == 'allMission':
             sql = self.allMission(first_letter, item_letter, rangeSet, dto.tier, options, subjectSet)
         elif dto.type == 'protect':
@@ -282,7 +282,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
 
         return sql
         
-    def mission(self, count, front_initial1, front_initial2, mission, rangeSet, shMisType, options, subjectSet):
+    def mission(self, front_initial1, front_initial2, mission, rangeSet, shMisType, options, subjectSet):
         if mission == "":
             if not rangeSet:
                 rangeSet = f"""
@@ -327,91 +327,40 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 LIMIT 1000;
             """
 
-        elif shMisType == 'score':
-            if not rangeSet:
-                rangeSet = f"""
-                (
-                    Word.word LIKE '{front_initial1}%' OR
-                    Word.word LIKE '{front_initial2}%'
-                )
-            """
-
-            sql = f"""
-                SELECT
-                Word.word,
-                CAST(calculate_value(Word.word, '{mission}', 1, {count}) AS SIGNED)
-                score,
-                checked
-                FROM Word
-                {subjectSet}
-                WHERE {rangeSet}
-                {options}
-                ORDER BY score DESC
-                LIMIT 10;
-            """
-        elif shMisType == 'value':
-            if not rangeSet:
-                rangeSet = f"""
-                (
-                    Word.word LIKE '{front_initial1}%' OR
-                    Word.word LIKE '{front_initial2}%'
-                )
-            """
-
-            sql = f"""
-                WITH SelectedWords AS (
-                SELECT
-                    word,
-                    RIGHT(Word.word, 1) AS last_char,
-                    CAST(calculate_value(Word.word, '{mission}', 1, {count}) AS SIGNED) AS score,
-                    checked
-                FROM word
-                {subjectSet}
-                WHERE {rangeSet}
-                {options}
-                ORDER BY score DESC
-                LIMIT 10
-            )
-            SELECT 
-            SelectedWords.word,
-            SelectedWords.score - (
-                SELECT
-                CAST(GREATEST(
-                    calculate_value(Word.word, '가', 1, {count}),
-                    calculate_value(Word.word, '나', 1, {count}),
-                    calculate_value(Word.word, '다', 1, {count}),
-                    calculate_value(Word.word, '라', 1, {count}),
-                    calculate_value(Word.word, '마', 1, {count}),
-                    calculate_value(Word.word, '바', 1, {count}),
-                    calculate_value(Word.word, '사', 1, {count}),
-                    calculate_value(Word.word, '아', 1, {count}),
-                    calculate_value(Word.word, '자', 1, {count}),
-                    calculate_value(Word.word, '차', 1, {count}),
-                    calculate_value(Word.word, '카', 1, {count}),
-                    calculate_value(Word.word, '타', 1, {count}),
-                    calculate_value(Word.word, '파', 1, {count}),
-                    calculate_value(Word.word, '하', 1, {count})
-                ) AS SIGNED) AS max_score
-                FROM 
-                    Word
-                {subjectSet}
-                WHERE 
-                    Word.word LIKE CONCAT(last_char, '%')
-                ORDER BY 
-                    max_score DESC
-                LIMIT 1
-            ) as value,
-            SelectedWords.checked
-            FROM SelectedWords
-            ORDER BY value DESC;
-            """
-            
         elif shMisType == 'theory':
             if not rangeSet:
                 rangeSet = f"""
                 (
                     LEFT(Word.word, {len(front_initial1)}) = '{front_initial1}'
                     OR LEFT(Word.word, {len(front_initial1)}) = '{front_initial2}'
+                )
+            """
+
+            sql = f"""
+                SELECT
+                Word.word,
+                (CountCharacter(Word.word, '{mission}'))
+                AS mission,
+                RANK() OVER (ORDER BY 
+                    (CountCharacter(Word.word, '{mission}')) DESC,
+                    CHAR_LENGTH(Word.word) DESC)
+                AS ranking,
+                checked
+                FROM word
+                {subjectSet}
+                WHERE {rangeSet}
+                {options}
+                LIMIT 10;
+            """
+
+        elif shMisType == 'reflect':
+            if not rangeSet:
+                rangeSet = f"""
+                (
+                    LEFT(Word.word, {len(front_initial1)}) = '{front_initial1}'
+                    AND RIGHT(Word.word, {len(front_initial1)}) = '{front_initial1}'
+                    OR LEFT(Word.word, {len(front_initial1)}) = '{front_initial2}'
+                    AND RIGHT(Word.word, {len(front_initial1)}) = '{front_initial2}'
                 )
             """
 
@@ -1177,47 +1126,6 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-
-    def mission_word(self, dto):
-        # word, initial
-        missionInitials = "가나다라마바사아자차카타파하"
-        words = {"가": [], "나": [], "다": [], "라": [],
-                 "마": [], "바": [], "사": [], "아": [],
-                 "자": [], "차": [], "카": [], "타": [],
-                 "파": [], "하": []}
-        
-        firstInitial = dto.initial[0]
-        secondInitial = dto.initial[1]
-    
-        if dto.shMisType == "theory":
-
-            for mi in missionInitials:
-                sql = f"""
-                SELECT
-                word,
-                (CountCharacter(word, '{mi}'))
-                AS mission,
-                RANK() OVER (ORDER BY 
-                    (CountCharacter(word, '{mi}')) DESC,
-                    CHAR_LENGTH(Word.word) DESC)
-                AS ranking
-                FROM word
-                WHERE word LIKE '{firstInitial}%'
-                AND word LIKE '{secondInitial}%'
-                LIMIT 10;
-                """
-
-                try:
-                    result = self.session.execute(text(sql)).fetchall()
-                    words[mi] = [list(row) for row in result]
-                except Exception as e:
-                    self.session.rollback()
-                    print(f"Error: {e}")
-                    return ["error", "문제가 발생하였습니다."]
-            
-            return words
-        else:
-            return "아직 지원하지 않습니다."
         
     def all_word(self):
         sql = f"""

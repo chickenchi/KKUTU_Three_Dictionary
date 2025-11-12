@@ -1,12 +1,12 @@
 export const elementsProps = {
-  value: "이론적 가치순",
-  score: "점수",
-  theory: "미션 + 장문순",
+  theory: "기본 순서",
+  reflect: "반사 단어 기준",
 };
 
 export const optionProps = {
   hardAttack: "선호 공격",
   long: "장문",
+  mission: "미션",
   villain: "빌런 & 앞말",
   protect: "찾기",
 };

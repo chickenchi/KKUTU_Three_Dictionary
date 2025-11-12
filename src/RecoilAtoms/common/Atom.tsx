@@ -28,7 +28,7 @@ export const practiceOptionOpenSetting = atom<boolean>({
 
 export const shMisTypeState = atom<string>({
   key: "shMisTypeState",
-  default: "theory",
+  default: "length",
 });
 
 export const settingOptionState = atom<string>({
