@@ -18,6 +18,8 @@ class WordService:
                 words = [[s[0], s[1], s[3]] for s in words]
             else:
                 words = [[s[0], s[1], s[2]] for s in words]
+        elif dto.type == "neutralAttack":
+            words = [[s[0]] for s in words]
         else:
             words = [[s[0], s[1]] for s in words]
 

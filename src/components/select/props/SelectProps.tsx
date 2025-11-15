@@ -4,7 +4,8 @@ export const elementsProps = {
 };
 
 export const optionProps = {
-  hardAttack: "선호 공격",
+  hardAttack: "필킬",
+  neutralAttack: "중립",
   long: "장문",
   mission: "미션",
   villain: "빌런 & 앞말",
