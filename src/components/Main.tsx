@@ -14,6 +14,7 @@ import {
   optionState,
   subjectState,
   shMisTypeState,
+  resultCountState,
 } from "../RecoilAtoms/common/Atom";
 import SubjectModal from "../tools/subjectFunction/Subject";
 import SubjectButton from "./buttons/SubjectButton";
@@ -194,6 +195,12 @@ const SearchButton = styled.button`
   }
 `;
 
+const ResultCount = styled.p`
+  margin-left: 5pt;
+  font-size: 12pt;
+  font-family: "Pretendard";
+`;
+
 const Words = styled.button<{ checked: number; rank?: number }>`
   background-color: rgba(0, 0, 0, 0);
   display: block;
@@ -217,6 +224,7 @@ const Words = styled.button<{ checked: number; rank?: number }>`
 
 const Main = () => {
   const [selectedOption, setSelectedOption] = useRecoilState(optionState);
+  const [resultCount, setResultCount] = useRecoilState(resultCountState);
 
   const [subjectOption, setSubjectOption] = useRecoilState(subjectState);
   const [wordValue, setWordValue] = useState("");
@@ -412,8 +420,10 @@ const Main = () => {
       setWaiting(false);
 
       if (response.data !== "단어 없음") {
+        setResultCount(response.data.length);
         setWordList(response.data);
       } else {
+        setResultCount(0);
         setWordList(["아쉽게도 단어가 없네요..."]);
       }
     } catch (error) {
@@ -656,6 +666,9 @@ const Main = () => {
             />
           )}
           <SearchButton onClick={search}>검색</SearchButton>
+          {resultCount != 0 && (
+            <ResultCount>검색 결과: {resultCount}개</ResultCount>
+          )}
         </SearchContainer>
       </ToolList>
 

@@ -11,6 +11,11 @@ export const optionState = atom<string>({
   default: "villain",
 });
 
+export const resultCountState = atom<number>({
+  key: "resultCountState",
+  default: 0,
+});
+
 export const subjectState = atom({
   key: "subjectState",
   default: "주제 없음",

@@ -98,7 +98,7 @@ class WordDB:
             """
 
         if isOneHitWord:
-            oneHitWordInitial = self.oneHitWordInitial(first_letter, item_letter, options, isOneHitWord, subjectSet)
+            oneHitWordInitial = self.oneHitWordInitial(isOneHitWord)
             options += oneHitWordInitial
 
         if isManner:
@@ -138,46 +138,34 @@ class WordDB:
 
         return result
     
-    def oneHitWordInitial(self, front_initial1, front_initial2, options, isOneHitWord, subjectSet):
-        rangeSet = f"""
-        (
-            Word.word LIKE '{front_initial1}%' OR
-            Word.word LIKE '{front_initial2}%'
-        )
-        """
-            
-        back_initials = self.getBackInitials(rangeSet, options, subjectSet)
+    def oneHitWordInitial(self, isOneHitWord):
+        one_hit_list = [
+            '녘','꾼','늄','뜩','것','뿐','읖','뿟','렛','켓','펫','슝','렁','걍','륨','슭','슛','슨',
+            '겡','럽','쯤','먕','욷','쩐','썹','껸','밈','븜','븨','싶','욤','뮴','씸','틤','껏','셤',
+            '믐','쁨','쑴','켠','낏','꾜','텝','븀','럴','흴','캣','튠','듈','눔','휵','냔','냘','픈',
+            '꼍','쿄','꼇','튐','귿','읒','읗','탉','묑','엣','읃','뗌','믄','듐','븐','튬','룅','츨',
+            '탸','탓','럿','엌','슥','숱','츰','쥬','뜽','칮','곬','틋','깥','픔','줴','륀','됭','렝',
+            '핌','윰','픗','듸','읏','쭘','갗','몃','욹','및','찟','텟','룀','뼉','콫','톹','죌','쾃',
+            '윅','깆','찱','팎','걔','씃','쩜','덟','볜','얏','랖','줅','퓸','촨','쯕','긔','뎬','꼉',
+            '돐','밗','읓','숑','냑','뮨','낵','켸','읔','앝','읕','팁','끠','겊'
+        ]
 
-        oneHitWordInitials = "AND"
+        # 시작
+        oneHitWordInitials = "AND "
 
-        if isOneHitWord == True:
-            oneHitWordInitials += """
-(
-Word.word LIKE '궰'"""
+        if isOneHitWord:
+            oneHitWordInitials += "(\nWord.word LIKE '궰'\n"
         else:
-            oneHitWordInitials += """ NOT ("""
+            oneHitWordInitials += "NOT (\n"
 
-        for back_initial in back_initials:
-            sql = f"""
-            SELECT EXISTS (
-                SELECT 1
-                FROM word
-                WHERE word LIKE '{back_initial[0]}%'
-                OR word LIKE CONCAT(getDoumChar('{back_initial[0]}'), '%')
-            );
-            """
+        # 리스트 기반으로 조건 추가
+        for ch in one_hit_list:
+            oneHitWordInitials += f"OR Word.word LIKE '%{ch}'\n"
 
-            result = self.session.execute(text(sql)).fetchall()
-
-            if result[0][0] == 0:
-                oneHitWordInitials += f"""
-OR Word.word LIKE '%{back_initial[0]}'"""
-
-        oneHitWordInitials += """
-)"""
+        oneHitWordInitials += ")\n"
 
         return oneHitWordInitials
-    
+
     def mannerShieldInitial(self, front_initial1, front_initial2, options, subjectSet):
         rangeSet = f"""
         (
