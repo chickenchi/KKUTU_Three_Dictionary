@@ -153,9 +153,12 @@ export const SettingPopup = ({ setOpenSetting }: SettingPopupProps) => {
 
   const addAttackWord = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:5000/attack_add", {
-        initial: attackInitial,
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:5000/recommend_attack_add",
+        {
+          initial: attackInitial,
+        }
+      );
 
       // http://127.0.0.1:5000/recommend_attack_add
 
@@ -230,9 +233,12 @@ export const SettingPopup = ({ setOpenSetting }: SettingPopupProps) => {
 
   const pull = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:5000/attack_pull", {
-        initial: attackInitial,
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:5000/recommend_attack_pull",
+        {
+          initial: attackInitial,
+        }
+      );
 
       //http://127.0.0.1:5000/recommend_attack_pull
 
