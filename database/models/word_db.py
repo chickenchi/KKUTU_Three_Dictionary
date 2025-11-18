@@ -128,7 +128,7 @@ class WordDB:
                 return self.valueMission(count, first_letter, item_letter, dto.mission, rangeSet, options, subjectSet)
             sql = self.mission(first_letter, item_letter, dto.mission, rangeSet, dto.shMisType, options, subjectSet)
         elif dto.type == 'allMission':
-            sql = self.allMission(first_letter, item_letter, rangeSet, dto.tier, options, subjectSet)
+            sql = self.allMission(first_letter, item_letter, rangeSet, dto.tier, options, subjectSet, dto.shMisType)
         elif dto.type == 'protect':
             sql = self.protect(first_letter, item_letter, rangeSet, options, subjectSet)
         elif dto.type == 'villain':
@@ -143,7 +143,7 @@ class WordDB:
         one_hit_list = [
             '녘','꾼','늄','뜩','것','뿐','읖','뿟','렛','켓','펫','슝','렁','걍','륨','슭','슛','슨',
             '겡','럽','쯤','먕','욷','쩐','썹','껸','밈','븜','븨','싶','욤','뮴','씸','틤','껏','셤',
-            '믐','쁨','쑴','켠','낏','꾜','텝','븀','럴','흴','캣','튠','듈','눔','휵','냔','냘','픈',
+            '믐','쁨','쑴','켠','낏','꾜','텝','븀','럴','캣','튠','듈','눔','휵','냔','냘','픈',
             '꼍','쿄','꼇','튐','귿','읒','읗','탉','묑','엣','읃','뗌','믄','듐','븐','튬','룅','츨',
             '탸','탓','럿','엌','슥','숱','츰','쥬','뜽','칮','곬','틋','깥','픔','줴','륀','됭','렝',
             '핌','윰','픗','듸','읏','쭘','갗','몃','욹','및','찟','텟','룀','뼉','콫','톹','죌','쾃',
@@ -209,7 +209,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
         print(subjectSet)
 
         include_block = """
-'학', '햄', '험', '혀', '혁', '승', '혐', '확', '획', '효', '훙', '훤', '흑', '힌', '팍', '팽', '핀', '핍', '핑', '탱', '턱', '텍', '톤', '틸', '캉', '캠', '켈', '쾌', '쿤', '쿵', '킬', '킴', '찹', '첩', '첸', '촉', '촐', '축', '췌', '잘', '젠', '족', '죄', '죽', '줌', '쥔', '즉', '짚', '짝', '짤', '짬', '쫄', '쭉', '쭌', '찍', '찝', '업', '엿', '욜', '윤', '율', '융', '을', '잇', '삭', '샅', '샨', '샬', '섭', '셋', '숙', '슐', '십', '싹', '썩', '쎄', '쑥', '쓱', '씩', '밖', '법', '볏', '볕', '봇', '붙', '뼈', '뽕', '맛', '맷', '멤', '멱', '몬', '못', '뫼', '묘', '뭉', '뮤', '랑', '랫', '렌', '렙', '렷', '롬', '룔', '륜', '률', '륭', '름', '릿', '닻', '댓', '댕', '덕', '덥', '델', '둑', '둔', '득', '듬', '딩', '떠', '또', '뜰', '뜸', '뜻', '낯', '넌', '넥', '넨', '녓', '뇰', '뉘', '늉', '늠', '닛', '겸', '곽', '굉', '궐', '궤', '균', '긍', '깐', '깝', '꺽', '꼼', '꿩', '끽'
+'학', '햄', '험', '혀', '혁', '승', '혐', '확', '획', '효', '훙', '훤', '흑', '힌', '팍', '팽', '핀', '핍', '핑', '탱', '턱', '텍', '톤', '틸', '캉', '캠', '켈', '쾌', '쿤', '쿵', '킬', '킴', '찹', '첩', '첸', '촉', '촐', '축', '췌', '잘', '젠', '족', '죄', '죽', '줌', '즉', '짚', '짝', '짤', '짬', '쫄', '쭉', '쭌', '찝', '업', '엿', '욜', '윤', '율', '융', '을', '잇', '삭', '샅', '샨', '샬', '섭', '셋', '숙', '슐', '십', '싹', '썩', '쎄', '쑥', '쓱', '씩', '밖', '법', '볏', '볕', '봇', '붙', '뼈', '뽕', '맛', '맷', '멤', '멱', '몬', '못', '뫼', '묘', '뭉', '뮤', '랑', '랫', '렌', '렙', '렷', '롬', '룔', '륜', '률', '륭', '름', '릿', '닻', '댓', '댕', '덕', '덥', '델', '둑', '둔', '득', '듬', '딩', '떠', '또', '뜰', '뜸', '뜻', '낯', '넌', '넥', '넨', '녓', '뇰', '뉘', '늉', '늠', '닛', '겸', '곽', '굉', '궐', '궤', '균', '긍', '깐', '깝', '꺽', '꼼', '꿩', '끽'
 """
 
         sql = f"""
@@ -604,14 +604,22 @@ OR Word.word LIKE '%{back_initial[0]}'"""
 
         return sorted(res, key=lambda x: x[1], reverse=True)
     
-    def allMission(self, front_initial1, front_initial2, rangeSet, tier, options, subjectSet):
+    def allMission(self, front_initial1, front_initial2, rangeSet, tier, options, subjectSet, shMisType):
         if not rangeSet:
-            rangeSet = f"""
-            (
-                LEFT(word, {len(front_initial1)}) = '{front_initial1}'
-                OR LEFT(word, {len(front_initial1)}) = '{front_initial2}'
-            )
-        """
+            if shMisType == 'reflect':
+                rangeSet = f"""
+                (
+                    word LIKE '{front_initial1}%{front_initial1}'
+                    OR word LIKE '{front_initial2}%{front_initial2}'
+                )
+            """
+            else:
+                rangeSet = f"""
+                (
+                    LEFT(word, {len(front_initial1)}) = '{front_initial1}'
+                    OR LEFT(word, {len(front_initial1)}) = '{front_initial2}'
+                )
+            """
 
         if 'a' <= front_initial1 <= 'z':
             sql = f"""
@@ -719,6 +727,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                     SELECT word, 'z', CountCharacter(word, 'z'), CHAR_LENGTH(Word.word), checked FROM word
                     {subjectSet}
                     WHERE {rangeSet} {options}
+
                 ),
                 RankedResults AS (
                     SELECT word, mission_letter, letter_count, word_length, checked, 

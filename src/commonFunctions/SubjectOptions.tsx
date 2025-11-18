@@ -2,6 +2,7 @@ export const subjectOptions = [
   { value: "all", label: "주제 없음" },
   { value: "", label: "--------- 노인정 주제 ---------", disabled: true },
   { value: "economy", label: "경제" },
+  { value: "history", label: "역사" },
   { value: "", label: "--------- 어인정 주제 ---------", disabled: true },
   { value: "sanabi", label: "산나비" },
 ];

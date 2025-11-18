@@ -61,7 +61,6 @@ const HeaderComponent = () => {
         <LinkText href="/modify">수정</LinkText>
         <LinkText href="/memo">메모</LinkText>
         <LinkText href="/practice">연습</LinkText>
-        <LinkText href="/check_mission">미션 확인</LinkText>
         <LinkText href="/pattern">공격 패턴</LinkText>
       </Nav>
     </Header>

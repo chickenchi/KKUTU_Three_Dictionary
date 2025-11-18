@@ -76,8 +76,7 @@ const CommandItemFunction = ({
         "theory",
         missionInitial,
         false,
-        false,
-        "kkuko"
+        false
       );
       UreadingWord(resultWord.split("\n"), isRead);
     } else if (readTarget.includes("~")) {
@@ -93,8 +92,7 @@ const CommandItemFunction = ({
         "",
         "",
         false,
-        false,
-        "kkuko"
+        false
       );
 
       UreadingWord(resultWord.split("\n"), isRead);
@@ -136,10 +134,11 @@ const CommandItemFunction = ({
 
     const parts = searchTarget.split(" ");
     const searchType = parts[0];
-    const server = parts[1];
-    const initial = parts[2];
-    const subject = parts[3];
-    const options = parts.slice(4);
+    const initial = parts[1];
+    const subject = parts[2];
+    const options = parts.slice(3);
+
+    console.log(options);
 
     let tier: number | string =
       options[0] === "*" ? "*" : options.length >= 1 ? parseInt(options[0]) : 1;
@@ -161,8 +160,7 @@ const CommandItemFunction = ({
           searchMissionType,
           missionInitial,
           isTenSecond,
-          isKnown,
-          server
+          isKnown
         );
         break;
 
@@ -177,8 +175,7 @@ const CommandItemFunction = ({
           searchMissionType,
           "",
           isTenSecond,
-          isKnown,
-          server
+          isKnown
         );
         break;
 
@@ -192,8 +189,7 @@ const CommandItemFunction = ({
           searchMissionType,
           "",
           isTenSecond,
-          isKnown,
-          server
+          isKnown
         );
         break;
     }
