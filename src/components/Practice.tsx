@@ -482,6 +482,7 @@ const Practice = () => {
         backWord: "",
         shMisType: shMisType,
         checklist: checklist,
+        practice: true,
       });
 
       setWaiting(false);
@@ -517,6 +518,10 @@ const Practice = () => {
       if (tier === response.data.length) tier = -1;
 
       tier += 1;
+
+      if (selectedOption == "long" && tier != 0) {
+        tier = response.data[tier + 1][2];
+      }
 
       writeLog(`[user] mission [${missionValue}]에서 ${answer} 입력`);
 
@@ -557,6 +562,7 @@ const Practice = () => {
         backWord: missionValue,
         shMisType: "theory",
         checklist: checklist,
+        practice: true,
       });
 
       setWaiting(false);
@@ -643,6 +649,7 @@ const Practice = () => {
             backWord: "",
             shMisType: "theory",
             checklist: checklist,
+            practice: true,
           });
 
           setWaiting(false);

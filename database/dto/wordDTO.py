@@ -1,5 +1,16 @@
 class WordDTO:
-    def __init__(self, word, type, subject, mission, shMisType, backWord, checklist=[], tier=1):
+    def __init__(
+        self,
+        word,
+        type,
+        subject,
+        mission,
+        shMisType,
+        backWord,
+        checklist=[],
+        tier=1,
+        practice=False,
+    ):
         self._word = word
         self._backWord = backWord
         self._type = type
@@ -8,6 +19,7 @@ class WordDTO:
         self._shMisType = shMisType
         self._checklist = checklist
         self._tier = tier
+        self._practice = practice
 
     @property
     def word(self):
@@ -16,15 +28,15 @@ class WordDTO:
     @property
     def type(self):
         return self._type
-    
+
     @property
     def subject(self):
         return self._subject
-    
+
     @property
     def mission(self):
         return self._mission
-    
+
     @property
     def backWord(self):
         return self._backWord
@@ -32,12 +44,15 @@ class WordDTO:
     @property
     def shMisType(self):
         return self._shMisType
-    
+
     @property
     def checklist(self):
         return self._checklist
-    
+
     @property
     def tier(self):
         return self._tier
-    
+
+    @property
+    def practice(self):
+        return self._practice

@@ -44,6 +44,8 @@ class WordDB:
         if item_letter is None:
             item_letter = ""
 
+        practice = dto.practice
+
         sql = ""
         rangeSet = ""
         options = ""
@@ -64,8 +66,6 @@ class WordDB:
         isAttack = (
             dto.checklist[5] if dto.checklist and len(dto.checklist) > 5 else False
         )
-
-        print(isAttack)
 
         if first_letter != "" and first_letter in "ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ":
             start, end = self.get_hangul_range(first_letter)
@@ -161,7 +161,9 @@ class WordDB:
                 first_letter, item_letter, dto.backWord, rangeSet, options, subjectSet
             )
         elif dto.type == "long":
-            sql = self.long(first_letter, item_letter, rangeSet, options, subjectSet)
+            sql = self.long(
+                first_letter, item_letter, rangeSet, options, subjectSet, practice
+            )
 
         result = self.session.execute(text(sql)).fetchall()
         return result
@@ -364,8 +366,6 @@ OR Word.word LIKE '%{back_initial[0]}'"""
         return mannerShieldInitials
 
     def neutral_attack(self, front_initial1, front_initial2, options, subjectSet):
-        print(subjectSet)
-
         include_block = """
 '학', '햄', '험', '혀', '혁', '승', '혐', '확', '획', '효', '훙', '훤', '흑', '힌', '팍', '팽', '핀', '핍', '핑', '탱', '턱', '텍', '톤', '틸', '캉', '캠', '켈', '쾌', '쿤', '쿵', '킬', '킴', '찹', '첩', '첸', '촉', '촐', '축', '췌', '잘', '젠', '족', '죄', '죽', '줌', '즉', '짚', '짝', '짤', '짬', '쫄', '쭉', '쭌', '찝', '업', '엿', '욜', '윤', '율', '융', '을', '잇', '삭', '샅', '샨', '샬', '섭', '셋', '숙', '슐', '십', '싹', '썩', '쎄', '쑥', '쓱', '씩', '밖', '법', '볏', '볕', '봇', '붙', '뼈', '뽕', '맛', '맷', '멤', '멱', '몬', '못', '뫼', '묘', '뭉', '뮤', '랑', '랫', '렌', '렙', '렷', '롬', '룔', '륜', '률', '륭', '름', '릿', '닻', '댓', '댕', '덕', '덥', '델', '둑', '둔', '득', '듬', '딩', '떠', '또', '뜰', '뜸', '뜻', '낯', '넌', '넥', '넨', '녓', '뇰', '뉘', '늉', '늠', '닛', '겸', '곽', '굉', '궐', '궤', '균', '긍', '깐', '깝', '꺽', '꼼', '꿩', '끽'
 """
@@ -1037,7 +1037,9 @@ OR Word.word LIKE '%{back_initial[0]}'"""
 
         return sql
 
-    def long(self, front_initial1, front_initial2, rangeSet, options, subjectSet):
+    def long(
+        self, front_initial1, front_initial2, rangeSet, options, subjectSet, practice
+    ):
         if not rangeSet:
             rangeSet = f"""
                 (
@@ -1046,8 +1048,15 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 )
             """
 
+        rankMod = ""
+
+        if practice:
+            rankMod = """, LENGTH(word) AS len,
+    DENSE_RANK() OVER (ORDER BY LENGTH(word) DESC) AS len_rank
+"""
+
         sql = f"""
-                SELECT *
+                SELECT *{rankMod}
                 FROM Word
                 {subjectSet}
                 WHERE {rangeSet}
