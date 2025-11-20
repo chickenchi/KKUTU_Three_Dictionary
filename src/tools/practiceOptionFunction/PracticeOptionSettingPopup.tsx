@@ -387,9 +387,8 @@ export const PracticeOptionSettingPopup = () => {
                   value={shMisType}
                   onChange={handleSMTChange}
                 >
-                  <ShMisType value="value">이론(딜레이 있음)</ShMisType>
-                  <ShMisType value="score">점수</ShMisType>
-                  <ShMisType value="theory">개수</ShMisType>
+                  <ShMisType value="theory">기본</ShMisType>
+                  <ShMisType value="reflect">반사</ShMisType>
                 </MissionType>
               </TierOptionContainer>
             )}

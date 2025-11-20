@@ -519,8 +519,8 @@ const Practice = () => {
 
       tier += 1;
 
-      if (selectedOption == "long" && tier != 0) {
-        tier = response.data[tier + 1][2];
+      if (selectedOption == "long" && response.data[tier - 1][0] == answer) {
+        tier = response.data[tier - 1][2];
       }
 
       writeLog(`[user] mission [${missionValue}]에서 ${answer} 입력`);
