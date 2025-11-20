@@ -31,6 +31,7 @@ import {
   rangeCheckState,
   resetMissionCheckState,
   shMisTypeState,
+  shuffleInitialState,
 } from "../RecoilAtoms/practice/PracticeAtom";
 import { PracticeOptionSettingPopup } from "../tools/practiceOptionFunction/PracticeOptionSettingPopup";
 
@@ -241,6 +242,7 @@ const Practice = () => {
   const [isMannerCheck] = useRecoilState(mannerCheckState);
   const [attackCheck] = useRecoilState(attackCheckState);
   const [onehitWordCheck] = useRecoilState(oneHitWordCheckState);
+  const [shuffleInitialCheck] = useRecoilState(shuffleInitialState);
   const [rangeCheck] = useRecoilState(rangeCheckState);
   const [shMisType] = useRecoilState(shMisTypeState);
   const [missionValue, setMissionValue] = useRecoilState(missionValueState);
@@ -405,6 +407,8 @@ const Practice = () => {
         setAlarm("error", `단어를 입력하세요.`);
         return;
       }
+
+      if (shuffleInitialCheck) changeInitial();
 
       if (selectedOption === "villain") {
         let correctAnswer = villainWord[currentNumber][0];

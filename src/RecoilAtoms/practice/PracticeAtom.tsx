@@ -15,6 +15,11 @@ export const currentTierState = atom<number>({
   default: 1,
 });
 
+export const shuffleInitialState = atom<boolean>({
+  key: "shuffleInitialState",
+  default: false,
+});
+
 export const changeMissionCheckState = atom({
   key: "changeMissionCheckState",
   default: true,

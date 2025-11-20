@@ -22,6 +22,7 @@ import {
   rangeCheckState,
   resetMissionCheckState,
   shMisTypeState,
+  shuffleInitialState,
 } from "../../RecoilAtoms/practice/PracticeAtom";
 import { SelectItem } from "../../components/select/SelectItem";
 import { optionProps } from "../../components/select/props/SelectProps";
@@ -200,6 +201,8 @@ export const PracticeOptionSettingPopup = () => {
   const [answerCheck, setAnswerCheck] = useRecoilState(answerCheckState);
   const [onTierCheck, setOnTierCheck] = useRecoilState(onTierCheckState);
   const [currentTier, setCurrentTier] = useRecoilState(currentTierState);
+  const [isShuffleInitial, setShuffleInitial] =
+    useRecoilState(shuffleInitialState);
   const [changeMissionCheck, setChangeMissionCheck] = useRecoilState(
     changeMissionCheckState
   );
@@ -254,6 +257,10 @@ export const PracticeOptionSettingPopup = () => {
 
   const handleCurrentTierChange = (e: any) => {
     setCurrentTier(e.target.value);
+  };
+
+  const handleShuffleInitialChange = () => {
+    setShuffleInitial(!isShuffleInitial);
   };
 
   const handleChangeMissionChange = () => {
@@ -387,6 +394,16 @@ export const PracticeOptionSettingPopup = () => {
               </TierOptionContainer>
             )}
           </TierContainer>
+
+          <RadioContainer>
+            <RadioTitle>글자 섞기</RadioTitle>
+
+            <Checkbox
+              type="checkbox"
+              onClick={handleShuffleInitialChange}
+              checked={isShuffleInitial}
+            />
+          </RadioContainer>
         </AnalyzeContainer>
 
         <MissionContainer selectedOption={selectedOption}>

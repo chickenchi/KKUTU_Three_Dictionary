@@ -1052,7 +1052,6 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 {subjectSet}
                 WHERE {rangeSet}
                 {options}
-                AND CHAR_LENGTH(Word.word) > 8
                 ORDER BY CHAR_LENGTH(Word.word) DESC
                 LIMIT 1000
             """
