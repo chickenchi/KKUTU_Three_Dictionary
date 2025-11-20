@@ -496,7 +496,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 Word.word,
                 (CountCharacter(Word.word, '{mission}'))
                 AS mission,
-                RANK() OVER (ORDER BY 
+                DENSE_RANK() OVER (ORDER BY 
                     (CountCharacter(Word.word, '{mission}')) DESC,
                     CHAR_LENGTH(Word.word) DESC)
                 AS ranking,
@@ -522,7 +522,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 Word.word,
                 (CountCharacter(Word.word, '{mission}'))
                 AS mission,
-                RANK() OVER (ORDER BY 
+                DENSE_RANK() OVER (ORDER BY 
                     (CountCharacter(Word.word, '{mission}')) DESC,
                     CHAR_LENGTH(Word.word) DESC)
                 AS ranking,
@@ -550,7 +550,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 Word.word,
                 (CountCharacter(Word.word, '{mission}'))
                 AS mission,
-                RANK() OVER (ORDER BY 
+                DENSE_RANK() OVER (ORDER BY 
                     (CountCharacter(Word.word, '{mission}')) DESC,
                     CHAR_LENGTH(Word.word) DESC)
                 AS ranking,
