@@ -2,9 +2,10 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from collections import Counter
 
+
 class WordDB:
     def setting(self):
-        engine = create_engine('mysql+pymysql://root:1234@localhost/KKUTU', echo=False)
+        engine = create_engine("mysql+pymysql://root:1234@localhost/KKUTU", echo=False)
         Session = sessionmaker(bind=engine)
         self.session = Session()
         print("connect ok")
@@ -15,46 +16,58 @@ class WordDB:
     def get_hangul_range(self, first_letter):
         """한글 자음에 따른 유니코드 범위 반환"""
         ranges = {
-            'ㄱ': ('가', '낗'),
-            'ㄴ': ('나', '닣'),
-            'ㄷ': ('다', '딯'),
-            'ㄹ': ('라', '맇'),
-            'ㅁ': ('마', '밓'),
-            'ㅂ': ('바', '삫'),
-            'ㅅ': ('사', '앃'),
-            'ㅇ': ('아', '잏'),
-            'ㅈ': ('자', '짛'),
-            'ㅊ': ('차', '칳'),
-            'ㅋ': ('카', '킿'),
-            'ㅌ': ('타', '팋'),
-            'ㅍ': ('파', '핗'),
-            'ㅎ': ('하', '힣')
+            "ㄱ": ("가", "낗"),
+            "ㄴ": ("나", "닣"),
+            "ㄷ": ("다", "딯"),
+            "ㄹ": ("라", "맇"),
+            "ㅁ": ("마", "밓"),
+            "ㅂ": ("바", "삫"),
+            "ㅅ": ("사", "앃"),
+            "ㅇ": ("아", "잏"),
+            "ㅈ": ("자", "짛"),
+            "ㅊ": ("차", "칳"),
+            "ㅋ": ("카", "킿"),
+            "ㅌ": ("타", "팋"),
+            "ㅍ": ("파", "핗"),
+            "ㅎ": ("하", "힣"),
         }
         return ranges.get(first_letter, (None, None))
-    
+
     def find_word(self, dto):
         first_letter = dto.word[0]
         item_letter = dto.word[1]
         subject = dto.subject
 
-        if first_letter == None:
+        if first_letter is None:
             first_letter = ""
-        
-        if item_letter == None:
+
+        if item_letter is None:
             item_letter = ""
 
         sql = ""
         rangeSet = ""
         options = ""
-        
-        range = dto.checklist[0] if dto.checklist and len(dto.checklist) > 0 else False
-        isKnown = dto.checklist[1] if dto.checklist and len(dto.checklist) > 1 else False
-        isInjeong = dto.checklist[2] if dto.checklist and len(dto.checklist) > 2 else False
-        isOneHitWord = dto.checklist[3] if dto.checklist and len(dto.checklist) > 3 else False
-        isManner = dto.checklist[4] if dto.checklist and len(dto.checklist) > 4 else False
-        isAttack = dto.checklist[5] if dto.checklist and len(dto.checklist) > 5 else False
 
-        if first_letter != '' and first_letter in 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ':
+        range = dto.checklist[0] if dto.checklist and len(dto.checklist) > 0 else False
+        isKnown = (
+            dto.checklist[1] if dto.checklist and len(dto.checklist) > 1 else False
+        )
+        isInjeong = (
+            dto.checklist[2] if dto.checklist and len(dto.checklist) > 2 else False
+        )
+        isOneHitWord = (
+            dto.checklist[3] if dto.checklist and len(dto.checklist) > 3 else False
+        )
+        isManner = (
+            dto.checklist[4] if dto.checklist and len(dto.checklist) > 4 else False
+        )
+        isAttack = (
+            dto.checklist[5] if dto.checklist and len(dto.checklist) > 5 else False
+        )
+
+        print(isAttack)
+
+        if first_letter != "" and first_letter in "ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ":
             start, end = self.get_hangul_range(first_letter)
 
             rangeSet = f"""
@@ -72,49 +85,37 @@ class WordDB:
             options += "AND checked = true\n"
         if isInjeong:
             options += "AND injeong = false\n"
-        if subject != 'all':
+        if subject != "all":
             options += f"AND subject = '{subject}'\n"
             subjectSet = "JOIN WordSubject ON Word.word = WordSubject.word"
         else:
             subjectSet = ""
-
-        dontGive = False
-
-        if dontGive:
-            options += """
-                AND (
-                word LIKE '%g'
-                OR word LIKE '%j'
-                OR word LIKE '%k'
-                OR word LIKE '%q'
-                OR word LIKE '%r'
-                OR word LIKE '%u'
-                OR word LIKE '%v'
-                OR word LIKE '%w'
-                OR word LIKE '%x'
-                OR word LIKE '%y'
-                OR word LIKE '%z'
-                )
-            """
 
         if isOneHitWord:
             oneHitWordInitial = self.oneHitWordInitial(isOneHitWord)
             options += oneHitWordInitial
 
         if isManner:
-            mannerShieldInitial = self.mannerShieldInitial(first_letter, item_letter, options, subjectSet)
+            mannerShieldInitial = self.mannerShieldInitial(
+                first_letter, item_letter, options, subjectSet
+            )
             options += mannerShieldInitial
-        
+
         if isAttack:
             attackInitial = self.attack(first_letter, item_letter, options, subjectSet)
             options += attackInitial
 
-        if dto.type == 'hardAttack':
-            sql = self.hardAttack(first_letter, item_letter, rangeSet, options, subjectSet)
-        elif dto.type == 'neutralAttack':
+        if dto.type == "hardAttack":
+            sql = self.hardAttack(
+                first_letter, item_letter, rangeSet, options, subjectSet
+            )
+        elif dto.type == "neutralAttack":
             sql = self.neutral_attack(first_letter, item_letter, options, subjectSet)
-        elif dto.type == 'mission':
-            if first_letter != "" and first_letter[0] not in 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ':
+        elif dto.type == "mission":
+            if (
+                first_letter != ""
+                and first_letter[0] not in "ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ"
+            ):
                 sql = f"""
                     SELECT first_letter_count('{first_letter[0]}');
                 """
@@ -124,31 +125,188 @@ class WordDB:
             else:
                 count = 1000
 
-            if dto.shMisType == 'value':
-                return self.valueMission(count, first_letter, item_letter, dto.mission, rangeSet, options, subjectSet)
-            sql = self.mission(first_letter, item_letter, dto.mission, rangeSet, dto.shMisType, options, subjectSet)
-        elif dto.type == 'allMission':
-            sql = self.allMission(first_letter, item_letter, rangeSet, dto.tier, options, subjectSet, dto.shMisType)
-        elif dto.type == 'protect':
+            if dto.shMisType == "value":
+                return self.valueMission(
+                    count,
+                    first_letter,
+                    item_letter,
+                    dto.mission,
+                    rangeSet,
+                    options,
+                    subjectSet,
+                )
+            sql = self.mission(
+                first_letter,
+                item_letter,
+                dto.mission,
+                rangeSet,
+                dto.shMisType,
+                options,
+                subjectSet,
+            )
+        elif dto.type == "allMission":
+            sql = self.allMission(
+                first_letter,
+                item_letter,
+                rangeSet,
+                dto.tier,
+                options,
+                subjectSet,
+                dto.shMisType,
+            )
+        elif dto.type == "protect":
             sql = self.protect(first_letter, item_letter, rangeSet, options, subjectSet)
-        elif dto.type == 'villain':
-            sql = self.villain(first_letter, item_letter, dto.backWord, rangeSet, options, subjectSet)
-        elif dto.type == 'long':
+        elif dto.type == "villain":
+            sql = self.villain(
+                first_letter, item_letter, dto.backWord, rangeSet, options, subjectSet
+            )
+        elif dto.type == "long":
             sql = self.long(first_letter, item_letter, rangeSet, options, subjectSet)
 
         result = self.session.execute(text(sql)).fetchall()
         return result
-    
+
     def oneHitWordInitial(self, isOneHitWord):
         one_hit_list = [
-            '녘','꾼','늄','뜩','것','뿐','읖','뿟','렛','켓','펫','슝','렁','걍','륨','슭','슛','슨',
-            '겡','럽','쯤','먕','욷','쩐','썹','껸','밈','븜','븨','싶','욤','뮴','씸','틤','껏','셤',
-            '믐','쁨','쑴','켠','낏','꾜','텝','븀','럴','캣','튠','듈','눔','휵','냔','냘','픈',
-            '꼍','쿄','꼇','튐','귿','읒','읗','탉','묑','엣','읃','뗌','믄','듐','븐','튬','룅','츨',
-            '탸','탓','럿','엌','슥','숱','츰','쥬','뜽','칮','곬','틋','깥','픔','줴','륀','됭','렝',
-            '핌','윰','픗','듸','읏','쭘','갗','몃','욹','및','찟','텟','룀','뼉','콫','톹','죌','쾃',
-            '윅','깆','찱','팎','걔','씃','쩜','덟','볜','얏','랖','줅','퓸','촨','쯕','긔','뎬','꼉',
-            '돐','밗','읓','숑','냑','뮨','낵','켸','읔','앝','읕','팁','끠','겊'
+            "녘",
+            "꾼",
+            "늄",
+            "뜩",
+            "것",
+            "뿐",
+            "읖",
+            "뿟",
+            "렛",
+            "켓",
+            "펫",
+            "슝",
+            "렁",
+            "걍",
+            "륨",
+            "슭",
+            "슛",
+            "슨",
+            "겡",
+            "럽",
+            "쯤",
+            "먕",
+            "욷",
+            "쩐",
+            "썹",
+            "껸",
+            "밈",
+            "븜",
+            "븨",
+            "싶",
+            "욤",
+            "뮴",
+            "씸",
+            "틤",
+            "껏",
+            "셤",
+            "믐",
+            "쁨",
+            "쑴",
+            "켠",
+            "낏",
+            "꾜",
+            "텝",
+            "븀",
+            "럴",
+            "캣",
+            "튠",
+            "듈",
+            "눔",
+            "휵",
+            "냔",
+            "냘",
+            "픈",
+            "꼍",
+            "쿄",
+            "꼇",
+            "튐",
+            "귿",
+            "읒",
+            "읗",
+            "탉",
+            "묑",
+            "엣",
+            "읃",
+            "뗌",
+            "믄",
+            "듐",
+            "븐",
+            "튬",
+            "룅",
+            "츨",
+            "탸",
+            "탓",
+            "럿",
+            "엌",
+            "슥",
+            "숱",
+            "츰",
+            "쥬",
+            "뜽",
+            "칮",
+            "곬",
+            "틋",
+            "깥",
+            "픔",
+            "줴",
+            "륀",
+            "됭",
+            "렝",
+            "핌",
+            "윰",
+            "픗",
+            "듸",
+            "읏",
+            "쭘",
+            "갗",
+            "몃",
+            "욹",
+            "및",
+            "찟",
+            "텟",
+            "룀",
+            "뼉",
+            "콫",
+            "톹",
+            "죌",
+            "쾃",
+            "윅",
+            "깆",
+            "찱",
+            "팎",
+            "걔",
+            "씃",
+            "쩜",
+            "덟",
+            "볜",
+            "얏",
+            "랖",
+            "줅",
+            "퓸",
+            "촨",
+            "쯕",
+            "긔",
+            "뎬",
+            "꼉",
+            "돐",
+            "밗",
+            "읓",
+            "숑",
+            "냑",
+            "뮨",
+            "낵",
+            "켸",
+            "읔",
+            "앝",
+            "읕",
+            "팁",
+            "끠",
+            "겊",
         ]
 
         # 시작
@@ -174,7 +332,7 @@ class WordDB:
             Word.word LIKE '{front_initial2}%'
         )
         """
-            
+
         back_initials = self.getBackInitials(rangeSet, options, subjectSet)
 
         mannerShieldInitials = """
@@ -204,7 +362,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
 )"""
 
         return mannerShieldInitials
-    
+
     def neutral_attack(self, front_initial1, front_initial2, options, subjectSet):
         print(subjectSet)
 
@@ -239,7 +397,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             Word.word LIKE '{front_initial2}%'
         )
         """
-            
+
         back_initials = self.getBackInitials(rangeSet, options, subjectSet)
 
         attackInitials = """
@@ -270,7 +428,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
     )"""
 
         return attackInitials
-    
+
     def hardAttack(self, front_initial1, front_initial2, rangeSet, options, subjectSet):
         if not rangeSet:
             rangeSet = f"""
@@ -295,8 +453,17 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             """
 
         return sql
-        
-    def mission(self, front_initial1, front_initial2, mission, rangeSet, shMisType, options, subjectSet):
+
+    def mission(
+        self,
+        front_initial1,
+        front_initial2,
+        mission,
+        rangeSet,
+        shMisType,
+        options,
+        subjectSet,
+    ):
         if mission == "":
             if not rangeSet:
                 rangeSet = f"""
@@ -320,10 +487,10 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             """
         elif front_initial1 == "":
             if not rangeSet:
-                rangeSet = f"""
+                rangeSet = """
                 Word.word LIKE '%'
             """
-                
+
             sql = f"""
                 SELECT
                 Word.word,
@@ -341,7 +508,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 LIMIT 1000;
             """
 
-        elif shMisType == 'theory':
+        elif shMisType == "theory":
             if not rangeSet:
                 rangeSet = f"""
                 (
@@ -367,7 +534,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 LIMIT 10;
             """
 
-        elif shMisType == 'reflect':
+        elif shMisType == "reflect":
             if not rangeSet:
                 rangeSet = f"""
                 (
@@ -396,24 +563,24 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             """
 
         return sql
-    
+
     def get_initial_data(self, back_initial):
         sql = f"""
             SELECT *
             FROM initialScore
             WHERE initial = '{back_initial}'
         """
-    
+
         try:
             result = self.session.execute(text(sql)).fetchall()
             return result
-        
+
         except Exception as e:
             print(f"Error: {e}")
             return ["문제가 발생하였습니다."]
 
     def get_calculated_value(self, count, back_initial, chain):
-        if '가' <= back_initial <= '힣':
+        if "가" <= back_initial <= "힣":
             sql = f"""
                 SELECT 
                     word,
@@ -483,7 +650,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                     max_score DESC
                 LIMIT 1;
             """
-    
+
         try:
             result = self.session.execute(text(sql)).fetchall()
 
@@ -495,7 +662,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
 
         except Exception as e:
             print(f"Error: {e}")
-            return ["문제가 발생하였습니다."]  
+            return ["문제가 발생하였습니다."]
 
     def saveBackWordScore(self, back_initial, score):
         sql = f"""
@@ -510,7 +677,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
         except Exception as e:
             self.session.rollback()
             print(f"Error: {e}")
-     
+
     def removeBackWordScore(self, back_initial):
         sql = f"""
             DELETE FROM initialScore
@@ -542,7 +709,16 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             print(f"Error: {e}")
             return ["문제가 발생하였습니다."]
 
-    def valueMission(self, count, front_initial1, front_initial2, mission, rangeSet, options, subjectSet):
+    def valueMission(
+        self,
+        count,
+        front_initial1,
+        front_initial2,
+        mission,
+        rangeSet,
+        options,
+        subjectSet,
+    ):
         chain = 1
 
         if not rangeSet:
@@ -554,9 +730,9 @@ OR Word.word LIKE '%{back_initial[0]}'"""
         """
 
         result = self.getBackInitials(rangeSet, options, subjectSet)
-        
+
         rsList = {}
-        
+
         for back_initial in result:
             back_initial = back_initial[0]
             res = self.get_initial_data(back_initial)
@@ -565,7 +741,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 rsList[back_initial] = res[0][1]
             else:
                 rs = self.get_calculated_value(count, back_initial, chain)
-                
+
                 if rs == []:
                     rsList[back_initial] = 0
                 else:
@@ -585,13 +761,13 @@ OR Word.word LIKE '%{back_initial[0]}'"""
         """
 
         res = []
-        
+
         try:
             res = self.session.execute(text(sql)).fetchall()
         except Exception as e:
             print(f"Error: {e}")
             return ["문제가 발생하였습니다."]
-        
+
         for i in range(len(res) - 1, -1, -1):
             resultValue = res[i]
             if rsList[resultValue[2]] == 0:
@@ -603,10 +779,19 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 res[i] = tuple(resultValue)
 
         return sorted(res, key=lambda x: x[1], reverse=True)
-    
-    def allMission(self, front_initial1, front_initial2, rangeSet, tier, options, subjectSet, shMisType):
+
+    def allMission(
+        self,
+        front_initial1,
+        front_initial2,
+        rangeSet,
+        tier,
+        options,
+        subjectSet,
+        shMisType,
+    ):
         if not rangeSet:
-            if shMisType == 'reflect':
+            if shMisType == "reflect":
                 rangeSet = f"""
                 (
                     word LIKE '{front_initial1}%{front_initial1}'
@@ -621,7 +806,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 )
             """
 
-        if 'a' <= front_initial1 <= 'z':
+        if "a" <= front_initial1 <= "z":
             sql = f"""
                 WITH CountMissions AS (
                     SELECT word, 'a' AS mission_letter, CountCharacter(word, 'a') AS letter_count, CHAR_LENGTH(Word.word) AS word_length, checked FROM word
@@ -737,7 +922,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 SELECT word, mission_letter FROM RankedResults WHERE ranks = {tier}
             """
 
-        elif '가' <= front_initial1 <= '힣':
+        elif "가" <= front_initial1 <= "힣":
             sql = f"""
                 WITH CountMissions AS (
                     SELECT word, '가' AS mission_letter, CountCharacter(word, '가') AS letter_count, CHAR_LENGTH(Word.word) AS word_length, checked FROM word
@@ -806,7 +991,9 @@ OR Word.word LIKE '%{back_initial[0]}'"""
 
         return sql
 
-    def villain(self, front_initial1, front_initial2, back_word, rangeSet, options, subjectSet):
+    def villain(
+        self, front_initial1, front_initial2, back_word, rangeSet, options, subjectSet
+    ):
         if not rangeSet:
             rangeSet = f"""
                 (
@@ -825,7 +1012,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 ORDER BY LEFT(Word.word, {len(front_initial1)}) ASC, CHAR_LENGTH(Word.word) DESC
                 LIMIT 10000
             """
-        
+
         return sql
 
     def protect(self, front_initial1, front_initial2, rangeSet, options, subjectSet):
@@ -847,9 +1034,9 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 ORDER BY CHAR_LENGTH(Word.word) DESC
                 LIMIT 1000
             """
-        
+
         return sql
-        
+
     def long(self, front_initial1, front_initial2, rangeSet, options, subjectSet):
         if not rangeSet:
             rangeSet = f"""
@@ -869,14 +1056,13 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 ORDER BY CHAR_LENGTH(Word.word) DESC
                 LIMIT 1000
             """
-        
+
         return sql
-    
+
     def precise_find_word(self, word):
-        sql = """
+        sql = f"""
         SELECT word, checked
         FROM word
-{subjectSet}
         WHERE word = '{0}'
         """.format(word)
 
@@ -887,14 +1073,14 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-        
+
     def initial_max_score(self, dto):
         rangeSet = ""
 
-        word = dto['word']
-        chain = dto['chain']
+        word = dto["word"]
+        chain = dto["chain"]
 
-        if word[0] != '' and word[0] in 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ':
+        if word[0] != "" and word[0] in "ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ":
             start, end = self.get_hangul_range(word[0])
 
             rangeSet = f"""
@@ -907,7 +1093,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
 
         count = self.session.execute(text(sql)).fetchall()
         count = count[0][0]
-        
+
         if not rangeSet:
             rangeSet = f"""
                 (
@@ -916,7 +1102,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 )
             """
 
-        if '가' <= word[0] <= '힣':
+        if "가" <= word[0] <= "힣":
             sql = f"""
                 SELECT 
                 word,
@@ -990,20 +1176,14 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-    
-    def insert_word(self, dto):
-        words = dto['word'].splitlines()
 
-        sql = text(f"INSERT IGNORE INTO Word VALUES (:word, 0, '', 1)")
+    def insert_word(self, dto):
+        words = dto["word"].splitlines()
+
+        sql = text("INSERT IGNORE INTO Word VALUES (:word, 0, '', 1)")
 
         try:
-            result = self.session.execute(
-              sql,
-              [
-                {'word': w}
-                for w in zip(words)
-              ]
-            )
+            result = self.session.execute(sql, [{"word": w} for w in zip(words)])
             self.session.commit()
             affected_rows = result.rowcount
             if affected_rows == 0:
@@ -1014,14 +1194,14 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-        
+
     def delete_word(self, word):
         words = word.splitlines()
 
         sql = text("DELETE FROM word WHERE word = (:word)")
 
         try:
-            result = self.session.execute(sql, [{'word': w} for w in words])
+            result = self.session.execute(sql, [{"word": w} for w in words])
             self.session.commit()
             affected_rows = result.rowcount
             if affected_rows == 0:
@@ -1032,45 +1212,41 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-        
-    def insert_subject(self, dto):
-        words = dto['word']
-        subject = dto['subject']
 
-        sql = text(f"INSERT IGNORE INTO WordSubject VALUES (:word, :subject)")
+    def insert_subject(self, dto):
+        words = dto["word"]
+        subject = dto["subject"]
+
+        sql = text("INSERT IGNORE INTO WordSubject VALUES (:word, :subject)")
 
         try:
             self.session.execute(
-              sql,
-              [
-                {'word': w, 'subject': s}
-                for w, s in zip(words, subject)
-              ]
+                sql, [{"word": w, "subject": s} for w, s in zip(words, subject)]
             )
             self.session.commit()
-            return ["success", f"주제가 성공적으로 추가되었습니다."]
+            return ["success", "주제가 성공적으로 추가되었습니다."]
         except Exception as e:
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-        
-    def delete_subject(self, dto):
-        words = dto['word']
-        subject = dto['subject']
 
-        sql = text(f"DELETE FROM WordSubject WHERE word = :word AND subject = :subject")
+    def delete_subject(self, dto):
+        words = dto["word"]
+        subject = dto["subject"]
+
+        sql = text("DELETE FROM WordSubject WHERE word = :word AND subject = :subject")
 
         try:
             for w, s in zip(words, subject):
-                self.session.execute(sql, {'word': w, 'subject': s})
+                self.session.execute(sql, {"word": w, "subject": s})
 
             self.session.commit()
-            return ["success", f"주제가 성공적으로 삭제되었습니다."]
+            return ["success", "주제가 성공적으로 삭제되었습니다."]
         except Exception as e:
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-        
+
     def known_word(self, word, checked):
         sql = """
         UPDATE Word
@@ -1086,7 +1262,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-        
+
     def remember_phrase(self, word, phrase):
         sql = """
         UPDATE Word
@@ -1102,12 +1278,11 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-        
+
     def current_phrase(self, word):
         sql = """
         SELECT sentence
         FROM word
-{subjectSet}
         WHERE word = '{0}'
         """.format(word)
 
@@ -1118,7 +1293,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-        
+
     def uread(self, dto):
         try:
             if isinstance(dto.words, str):
@@ -1128,18 +1303,22 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                     SET checked = :isRead
                     WHERE word = :word
                 """
-                self.session.execute(text(sql), {"isRead": dto.isRead, "word": dto.words})
+                self.session.execute(
+                    text(sql), {"isRead": dto.isRead, "word": dto.words}
+                )
             else:
                 # 리스트인 경우
                 for word in dto.words:
-                    if '[' in word:
-                        word = word.split('] ')[1]
+                    if "[" in word:
+                        word = word.split("] ")[1]
                     sql = """
                         UPDATE Word
                         SET checked = :isRead
                         WHERE word = :word
                     """
-                    self.session.execute(text(sql), {"isRead": dto.isRead, "word": word})
+                    self.session.execute(
+                        text(sql), {"isRead": dto.isRead, "word": word}
+                    )
 
             self.session.commit()
             return ["success", "설정 완료."]
@@ -1147,9 +1326,9 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-        
+
     def all_word(self):
-        sql = f"""
+        sql = """
         SELECT *
         FROM word
         WHERE word NOT REGEXP '^[a-z]'
@@ -1163,9 +1342,9 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-        
+
     def initial(self):
-        sql = f"""
+        sql = """
         SELECT *
         FROM LoseInitial;
         """
@@ -1177,7 +1356,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             self.session.rollback()
             print(f"Error: {e}")
             return ["error", "문제가 발생하였습니다."]
-        
+
     def rare_box(self, dto):
         pieces = dto.piece
         highPieces = dto.highPiece
@@ -1190,8 +1369,8 @@ OR Word.word LIKE '%{back_initial[0]}'"""
         pieceList = ""
 
         for piece in highPieces:
-            pieceItem = piece[0] # 글자 조각
-            pieceCount = piece[1] # 개수
+            pieceItem = piece[0]  # 글자 조각
+            pieceCount = piece[1]  # 개수
 
             pieceList += pieceItem
 
@@ -1209,8 +1388,8 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             """
 
         for piece in rarePieces:
-            pieceItem = piece[0] # 글자 조각
-            pieceCount = piece[1] # 개수
+            pieceItem = piece[0]  # 글자 조각
+            pieceCount = piece[1]  # 개수
 
             pieceList += pieceItem
 
@@ -1228,8 +1407,8 @@ OR Word.word LIKE '%{back_initial[0]}'"""
             """
 
         for piece in pieces:
-            pieceItem = piece[0] # 글자 조각
-            pieceCount = piece[1] # 개수
+            pieceItem = piece[0]  # 글자 조각
+            pieceCount = piece[1]  # 개수
 
             pieceList += pieceItem
 
@@ -1237,9 +1416,11 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 AND (CHAR_LENGTH(word) - CHAR_LENGTH(REPLACE(word, '{pieceItem}', '')) <= {pieceCount})
             """
 
-        if rarePiecesSetting == "": rarePiecesSetting = 0
-        if highPiecesSetting == "": highPiecesSetting = 0
-          
+        if rarePiecesSetting == "":
+            rarePiecesSetting = 0
+        if highPiecesSetting == "":
+            highPiecesSetting = 0
+
         sql = f"""
             SELECT word
             FROM Word
@@ -1274,7 +1455,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
 
         result = self.session.execute(text(sql)).fetchall()
         return result
-        
+
     def find_word_by_piece(self, dto):
         pieces = dto.piece
 
@@ -1283,14 +1464,14 @@ OR Word.word LIKE '%{back_initial[0]}'"""
         if len(rare_result) != 0:
             print(rare_result)
             return rare_result
-        
+
         if len(pieces) <= 300:
             pieceList = ""
 
-            sql = f"""
+            sql = """
                 SELECT word
                 FROM word
-            """ 
+            """
 
             pieceSetting = ""
 
@@ -1310,7 +1491,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
 
             sql += pieceSetting
 
-            sql += f"""
+            sql += """
                 AND CHAR_LENGTH(word) <= 6
                 ORDER BY CHAR_LENGTH(word) DESC
             """
@@ -1322,26 +1503,26 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                 self.session.rollback()
                 print(f"Error: {e}")
                 return ["error", "문제가 발생하였습니다."]
-                
+
         else:
-            sql = f"""
+            sql = """
             SELECT word
             FROM word
             WHERE CHAR_LENGTH(word) <= 6"""
-        
+
             try:
                 result = self.session.execute(text(sql)).fetchall()
             except Exception as e:
                 self.session.rollback()
                 print(f"Error: {e}")
                 return ["error", "문제가 발생하였습니다."]
-            
+
             passedWords = []
             pieceDict = {}
 
             for piece in pieces:
                 pieceDict[piece[0]] = piece[1]
-            
+
             for word in result:
                 word = word[0]
 
@@ -1354,7 +1535,7 @@ OR Word.word LIKE '%{back_initial[0]}'"""
                         check = False
                         break
 
-                if check == True:
+                if check is True:
                     passedWords.append(word)
 
             return passedWords

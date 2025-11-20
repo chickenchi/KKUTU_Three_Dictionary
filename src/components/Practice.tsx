@@ -19,10 +19,13 @@ import { getValueByLabel } from "../commonFunctions/SubjectOptions";
 import SubjectModal from "../tools/subjectFunction/Subject";
 import {
   answerCheckState,
+  attackCheckState,
   changeMissionCheckState,
   currentTierState,
   injeongCheckState,
+  mannerCheckState,
   missionValueState,
+  oneHitWordCheckState,
   onTierCheckState,
   randomMissionCheckState,
   rangeCheckState,
@@ -230,6 +233,9 @@ const Practice = () => {
   const [randomMissionCheck] = useRecoilState(randomMissionCheckState);
   const [resetMissionCheck] = useRecoilState(resetMissionCheckState);
   const [injeongCheck] = useRecoilState(injeongCheckState);
+  const [isMannerCheck] = useRecoilState(mannerCheckState);
+  const [attackCheck] = useRecoilState(attackCheckState);
+  const [onehitWordCheck] = useRecoilState(oneHitWordCheckState);
   const [rangeCheck] = useRecoilState(rangeCheckState);
   const [shMisType] = useRecoilState(shMisTypeState);
   const [missionValue, setMissionValue] = useRecoilState(missionValueState);
@@ -441,7 +447,23 @@ const Practice = () => {
         rangeString = await getFromLocalStorage("wordRange");
       }
 
-      let checklist = [rangeString, false, injeongCheck, false, false, true];
+      let checklist = [
+        rangeString,
+        attackCheck,
+        injeongCheck,
+        isMannerCheck,
+        onehitWordCheck,
+      ];
+
+      console.log([
+        initialList,
+        selectedOption,
+        subject,
+        missionValue,
+        "",
+        shMisType,
+        checklist,
+      ]);
 
       let response = await axios.post("http://127.0.0.1:5000/word", {
         word: initialList,
@@ -510,7 +532,13 @@ const Practice = () => {
         rangeString = await getFromLocalStorage("wordRange");
       }
 
-      let checklist = [rangeString, false, injeongCheck, false, false, true];
+      let checklist = [
+        rangeString,
+        attackCheck,
+        injeongCheck,
+        isMannerCheck,
+        onehitWordCheck,
+      ];
 
       const response = await axios.post("http://127.0.0.1:5000/word", {
         word: ["", ""],
@@ -592,11 +620,10 @@ const Practice = () => {
 
           let checklist = [
             rangeString,
-            false,
+            attackCheck,
             injeongCheck,
-            false,
-            false,
-            true,
+            isMannerCheck,
+            onehitWordCheck,
           ];
 
           let response = await axios.post("http://127.0.0.1:5000/word", {

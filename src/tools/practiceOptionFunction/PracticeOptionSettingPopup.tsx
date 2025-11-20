@@ -10,10 +10,13 @@ import {
 import SubjectButton from "../../components/buttons/SubjectButton";
 import {
   answerCheckState,
+  attackCheckState,
   changeMissionCheckState,
   currentTierState,
   injeongCheckState,
+  mannerCheckState,
   missionValueState,
+  oneHitWordCheckState,
   onTierCheckState,
   randomMissionCheckState,
   rangeCheckState,
@@ -51,7 +54,7 @@ const StyledModal = styled(Modal)`
 
     max-width: 400px;
     width: 100%;
-    height: 300px;
+    height: 350px;
 
     padding: 30px;
 
@@ -68,7 +71,50 @@ const StyledModal = styled(Modal)`
 `;
 
 const Title = styled.h1`
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+`;
+
+const SelectContainer = styled.div`
+  width: 100%;
+
+  margin-bottom: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-direction: row;
+`;
+
+const AnalyzeContainer = styled.div`
+  height: 150px;
+
+  padding: 5px;
+
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+`;
+
+const WordRestrictContainer = styled.div`
+  height: 150px;
+
+  padding: 5px;
+
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+`;
+
+const MissionContainer = styled.div<{ selectedOption: string }>`
+  height: 150px;
+
+  padding: 5px;
+
+  display: ${({ selectedOption }) =>
+    selectedOption === "mission" ? "flex" : "none"};
+  align-items: flex-end;
+  flex-direction: column;
 `;
 
 const RadioList = styled.div`
@@ -77,19 +123,18 @@ const RadioList = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
+  flex-direction: row;
 `;
 
 const TierContainer = styled.div`
   height: 30px;
   display: flex;
   align-items: center;
+  flex-direction: column;
 `;
 
-const MissionContainer = styled.div<{ selectedOption: string }>`
-  display: ${({ selectedOption }) =>
-    selectedOption === "mission" ? "flex" : "none"};
-  flex-direction: row;
+const TierOptionContainer = styled.div`
+  display: flex;
 `;
 
 const EtcContainer = styled.div`
@@ -99,6 +144,8 @@ const EtcContainer = styled.div`
 
 const CloseButton = styled.button`
   padding: 5px 10px;
+
+  margin-top: 20px;
 
   font-family: "KCC-Hanbit";
 `;
@@ -163,6 +210,10 @@ export const PracticeOptionSettingPopup = () => {
     resetMissionCheckState
   );
   const [injeongCheck, setInjeongCheck] = useRecoilState(injeongCheckState);
+  const [isAttack, setIsAttackCheck] = useRecoilState(attackCheckState);
+  const [isOneHitWord, setIsOneHitWordCheck] =
+    useRecoilState(oneHitWordCheckState);
+  const [isManner, setIsMannerCheck] = useRecoilState(mannerCheckState);
   const [rangeCheck, setRangeCheck] = useRecoilState(rangeCheckState);
   const [shMisType, setShMisType] = useRecoilState(shMisTypeState);
   const [, setMissionValue] = useRecoilState(missionValueState);
@@ -179,6 +230,18 @@ export const PracticeOptionSettingPopup = () => {
 
   const handleInjeongChange = () => {
     setInjeongCheck(!injeongCheck);
+  };
+
+  const handleIsAttackChange = () => {
+    setIsAttackCheck(!isAttack);
+  };
+
+  const handleIsOnHitWordChange = () => {
+    setIsOneHitWordCheck(!isOneHitWord);
+  };
+
+  const handleIsMannerChange = () => {
+    setIsMannerCheck(!isManner);
   };
 
   const handleCheckChange = () => {
@@ -216,31 +279,72 @@ export const PracticeOptionSettingPopup = () => {
     >
       <GlobalStyle />
       <Title>연습 옵션</Title>
-      <RadioList>
+      <SelectContainer>
         <SelectItem elements={optionProps} selectState={optionState} />
         <SubjectButton />
-
+      </SelectContainer>
+      <RadioList>
         <EtcContainer>
-          <RadioContainer>
-            <RadioTitle>범위</RadioTitle>
+          <WordRestrictContainer>
+            <RadioContainer>
+              <RadioTitle>범위</RadioTitle>
 
-            <Checkbox
-              type="checkbox"
-              onClick={handleRangeChange}
-              checked={rangeCheck}
-            />
-          </RadioContainer>
+              <Checkbox
+                type="checkbox"
+                onClick={handleRangeChange}
+                checked={rangeCheck}
+              />
+            </RadioContainer>
 
-          <RadioContainer>
-            <RadioTitle>노인정</RadioTitle>
+            <RadioContainer>
+              <RadioTitle>노인정</RadioTitle>
 
-            <Checkbox
-              type="checkbox"
-              onClick={handleInjeongChange}
-              checked={injeongCheck}
-            />
-          </RadioContainer>
+              <Checkbox
+                type="checkbox"
+                onClick={handleInjeongChange}
+                checked={injeongCheck}
+              />
+            </RadioContainer>
 
+            {!isOneHitWord && (
+              <RadioContainer>
+                <RadioTitle>공격 단어</RadioTitle>
+
+                <Checkbox
+                  type="checkbox"
+                  onChange={handleIsAttackChange}
+                  checked={isAttack}
+                />
+              </RadioContainer>
+            )}
+
+            {!isAttack && !isManner && (
+              <RadioContainer>
+                <RadioTitle>한방 단어</RadioTitle>
+
+                <Checkbox
+                  type="checkbox"
+                  onChange={handleIsOnHitWordChange}
+                  checked={isOneHitWord}
+                />
+              </RadioContainer>
+            )}
+
+            {!isOneHitWord && (
+              <RadioContainer>
+                <RadioTitle>매너 단어</RadioTitle>
+
+                <Checkbox
+                  type="checkbox"
+                  onChange={handleIsMannerChange}
+                  checked={isManner}
+                />
+              </RadioContainer>
+            )}
+          </WordRestrictContainer>
+        </EtcContainer>
+
+        <AnalyzeContainer>
           <RadioContainer>
             <RadioTitle>분석</RadioTitle>
 
@@ -250,40 +354,40 @@ export const PracticeOptionSettingPopup = () => {
               checked={answerCheck}
             />
           </RadioContainer>
-        </EtcContainer>
 
-        <TierContainer>
-          <RadioContainer>
-            <RadioTitle>확인 티어 고정</RadioTitle>
+          <TierContainer>
+            <RadioContainer>
+              <RadioTitle>확인 티어 고정</RadioTitle>
 
-            <Checkbox
-              type="checkbox"
-              onClick={handleOneTierChange}
-              checked={onTierCheck}
-            />
-          </RadioContainer>
-
-          {onTierCheck && (
-            <>
-              <TierNumber
-                value={currentTier}
-                onChange={handleCurrentTierChange}
-                placeholder="티어"
+              <Checkbox
+                type="checkbox"
+                onClick={handleOneTierChange}
+                checked={onTierCheck}
               />
+            </RadioContainer>
 
-              <MissionType
-                id="shMisType"
-                name="shMisType"
-                value={shMisType}
-                onChange={handleSMTChange}
-              >
-                <ShMisType value="value">이론(딜레이 있음)</ShMisType>
-                <ShMisType value="score">점수</ShMisType>
-                <ShMisType value="theory">개수</ShMisType>
-              </MissionType>
-            </>
-          )}
-        </TierContainer>
+            {onTierCheck && (
+              <TierOptionContainer>
+                <TierNumber
+                  value={currentTier}
+                  onChange={handleCurrentTierChange}
+                  placeholder="티어"
+                />
+
+                <MissionType
+                  id="shMisType"
+                  name="shMisType"
+                  value={shMisType}
+                  onChange={handleSMTChange}
+                >
+                  <ShMisType value="value">이론(딜레이 있음)</ShMisType>
+                  <ShMisType value="score">점수</ShMisType>
+                  <ShMisType value="theory">개수</ShMisType>
+                </MissionType>
+              </TierOptionContainer>
+            )}
+          </TierContainer>
+        </AnalyzeContainer>
 
         <MissionContainer selectedOption={selectedOption}>
           <RadioContainer>

@@ -30,15 +30,33 @@ export const resetMissionCheckState = atom({
   default: false,
 });
 
+// options
+export const rangeCheckState = atom({
+  key: "rangeCheckState",
+  default: false,
+});
+
 export const injeongCheckState = atom({
   key: "injeongCheckState",
   default: false,
 });
 
-export const rangeCheckState = atom({
-  key: "rangeCheckState",
+export const attackCheckState = atom({
+  key: "attackCheckState",
   default: false,
 });
+
+export const mannerCheckState = atom({
+  key: "mannerCheckState",
+  default: false,
+});
+
+export const oneHitWordCheckState = atom({
+  key: "oneHitWordCheckState",
+  default: false,
+});
+
+// end options
 
 export const shMisTypeState = atom<string>({
   key: "shMisTypeState",
