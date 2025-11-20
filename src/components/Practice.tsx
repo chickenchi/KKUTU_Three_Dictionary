@@ -115,12 +115,11 @@ const Keyword = styled.div`
   background-color: #deaf56;
   border: 4px solid #42341a;
   width: 80%;
-  height: 120px;
+  height: 130px;
 
   box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3);
 
   border-radius: 10px;
-  margin-left: 15px;
 
   color: white;
 
@@ -131,8 +130,10 @@ const Keyword = styled.div`
 
 const InKeyword = styled.div`
   background-color: #42341a;
-  width: 96%;
-  height: 80%;
+  width: 100%;
+  height: 100px;
+
+  margin: 0 10px;
 
   border-radius: 10px;
 
@@ -144,9 +145,12 @@ const InKeyword = styled.div`
 `;
 
 const Spell = styled.input`
-  width: 500px;
+  width: 100%;
   height: auto;
-  background-color: #42341a;
+
+  margin: 0 10px;
+
+  background-color: rgba(0, 0, 0, 0);
   border: none;
   outline: none;
 
@@ -170,10 +174,9 @@ const InputContainer = styled.div`
 `;
 
 const Type = styled.input`
-  width: 80%;
+  width: 70%;
   height: 50px;
 
-  margin-right: 5px;
   padding-left: 10px;
 
   border: 1px solid #c3c3c3;
@@ -189,10 +192,12 @@ const Shuffle = styled.button`
   background-color: white;
 
   border-radius: 10px;
-  border: none;
+  border: 1px solid #c3c3c3;
 
-  width: 50px;
-  height: 40px;
+  width: 60px;
+  height: 50px;
+
+  margin-left: 5px;
 
   font-family: "Pretendard";
 
@@ -754,7 +759,7 @@ const Practice = () => {
               type="text"
               value={initial}
               onChange={handleInitialChange}
-              maxLength={4}
+              maxLength={3}
               placeholder={`<${subjectOption}>`}
             />
           </InKeyword>
