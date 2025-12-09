@@ -59,7 +59,7 @@ const SubjectListBtn = styled.button`
 
 const SubjectButton = () => {
   const [subjectOption, setSubjectOption] = useRecoilState(subjectState);
-  const [showModal, setShowModal] = useRecoilState(modalState);
+  const [, setShowModal] = useRecoilState(modalState);
 
   const handleSubjectChange = (e: any) => {
     setSubjectOption(e.target.value);
